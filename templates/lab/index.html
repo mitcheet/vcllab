@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block sidebar %}
+<h1>Lab machine management</h1>
+<p>Hi {{ myuser.first_name }}  Here are your machines.</p>
+<p> You just asked me to: {{ action }}</p>
+<h2>Instructions</h2>
+<dl>
+<dt>Manage machines</dt><dd>Using this app you can start, stop, terminate and create lab machines.</dd>
+<dt>Start</dt><dd>Clicking 'Start Server' will start an existing lab machine.  Note - lab machines automatically shut down after 2 hours of inactivity</dd>
+<dt>Stop</dt><dd>'Stop Server' will stop an existing lab machine.  Stopped machines keep your data and can be started again</dd>
+<dt>Create</dt><dd>You can create lab machines as needed.  Each machine stands alone and does not share your work across them</dd>
+<dt>Terminate</dt><dd>'Terminate Server' deletes this lab machine and removes all of your data.  Only use this when you are completely finished and have saved all of your data to another machine</dd>
+<dt>Connecting</dt><dd>In order to connect to a running machine you need to use a Remote Desktop (for GUI access) or SSH (for terminal access) client.  The stock username for all of our lab machines is ubuntu with password loc1st</dd>
+</dl>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% endblock %}
+{% block content %}
+<h1>Manage existing lab machines</h1>
+{% if list_of_machines %}
+		
+	{% for key, value in list_of_machines.items %}
+	<form action="./" method="post">
+	{% csrf_token %}
+	<input type="hidden" name="iid" value="{{ key }}" />
+    <h2>Lab Machine: {{ key }}</h2> 
+	<ul>
+	{% for key2,value2 in value.items %}
+        <li><b>{{ key2 }}</b>: {{ value2 }}
+        {% if key2 == 'instance_state' and value2 == 'stopped' %}
+        	<input type="submit" name="action" value="Start Server" />
+        {% endif %}
+        {% if key2 == 'instance_state' and value2 == 'running' %}
+        	<input type="submit" name="action" value="Stop Server" />
+        {% endif %}
+        {% if key2 == 'instance_state'  and value2 != 'terminated' %}
+        	<input type="submit" name="action" value="Terminate Server" />
+        {% endif %}      
+        </li>  
+       
+    {% endfor %}
+	</ul> 
+</form>  
+{% endfor %}
+{% else %}
+	<p>You have not created any lab machines yet.</p>
+{% endif %}
+
+<h1>Create new lab machine</h1>
+
+{% if list_of_labs %}
+	{% for lab in list_of_labs %}
+	<form action="./" method="post">
+	{% csrf_token %}
+		<input type="hidden" name="iid" value="{{ lab.amazonami }}" />
+		<input type="hidden" name="username" value="{{ myuser.username }}" />
+		<ul>
+		<li><b>Class:</b>{{ lab.coursename }} </li>
+		<li><b>Description:</b>{{ lab.labdescription }} </li>
+		<li><b>Instructor:</b>{{ lab.courseinstructor }} </li>
+		</ul>
+		<select name="instance_type">
+			<option value="t1.micro">Micro</option>
+			<option value="m1.small">Small</option>
+			<option value="c1.medium">Medium</option>
+		</select>
+		<input type="submit" name="action" value="Create Server" />
+	</form>	
+	{% endfor %}
+{% endif %}
+
+
+
+{% endblock %}

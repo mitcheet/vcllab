@@ -1,0 +1,19 @@
+<html>
+	<head>
+	<link rel="stylesheet" type="text/css" href="/static/public/css/main.css" />	
+	</head>
+	<body>
+	<div id="header">
+	<h1><a href="/lab">Virtual Computer Lab</a></h1>
+	<a id="logout" class="button" href="./logout">Logout</a>
+	</div>
+	<div id="sidebar">
+		{% block sidebar %}
+		{% endblock %}
+	</div>
+	<div id="content">
+		{% block content %}
+		{% endblock %}
+	</div>
+	</body>
+</html>
